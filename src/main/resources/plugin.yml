@@ -1,0 +1,4 @@
+name: Arena
+version: '8'
+main: sudark2.Sudark.arena.Arena
+api-version: '1.21'
