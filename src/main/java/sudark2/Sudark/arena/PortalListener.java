@@ -1,14 +1,11 @@
 package sudark2.Sudark.arena;
 
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
-
-import static sudark2.Sudark.arena.Arena.arenaName;
-import static sudark2.Sudark.arena.Arena.get;
 
 public class PortalListener implements Listener {
 
@@ -28,21 +25,30 @@ public class PortalListener implements Listener {
 
     }
 
-    @EventHandler
-    public void onNewChunkLoad(ChunkLoadEvent event) {
-        if (!event.isNewChunk()) return;
+//    @EventHandler
+//    public void onNewChunkLoad(ChunkLoadEvent event) {
+//        if (!event.isNewChunk()) return;
+//
+//        Chunk chunk = event.getChunk();
+//        if (!chunk.getWorld().getName().equals(arenaName)) return;
+//
+//        Bukkit.getScheduler().runTaskLater(get(), () -> {
+//            World world = chunk.getWorld();
+//            int chunkX = chunk.getX() << 4;
+//            int chunkZ = chunk.getZ() << 4;
+//            int y = -63;
+//
+//            Block b1 = world.getBlockAt(chunkX + 7, y, chunkZ + 7);
+//            Block b2 = world.getBlockAt(chunkX + 0, y, chunkZ + 0);
+//            Block b3 = world.getBlockAt(chunkX + 15, y, chunkZ + 15);
+//
+//            b1.setType(Material.GILDED_BLACKSTONE, false);
+//            b2.setType(Material.PURPLE_STAINED_GLASS, false);
+//            b3.setType(Material.WHITE_TERRACOTTA, false);
+//        }, 8L);
+//
+//    }
 
-        Chunk chunk = event.getChunk();
-        if (!chunk.getWorld().getName().equals(arenaName)) return;
-
-        Bukkit.getScheduler().runTaskLater(get(), () -> {
-            World world = chunk.getWorld();
-            world.getBlockAt(chunk.getBlock(7, -63, 7).getLocation()).setType(Material.GOLD_BLOCK);
-            world.getBlockAt(chunk.getBlock(7, -63, 7).getLocation()).setType(Material.GILDED_BLACKSTONE);
-            world.getBlockAt(chunk.getBlock(0, -63, 0).getLocation()).setType(Material.PURPLE_STAINED_GLASS);
-            world.getBlockAt(chunk.getBlock(15, -63, 15).getLocation()).setType(Material.BLACK_STAINED_GLASS);
-        }, 1L);
-    }
 
     public void inquireTp(Player pl) {
         pl.sendMessage("Do you want to teleport to the arena? (y/n)");

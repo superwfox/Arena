@@ -5,12 +5,16 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.generator.WorldInfo;
 import org.codehaus.plexus.util.FileUtils;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 import static sudark2.Sudark.arena.Arena.arenaName;
+import static sudark2.Sudark.arena.ChunkTemplate.temps;
 
 public class WorldManager {
 
@@ -20,31 +24,27 @@ public class WorldManager {
     }
 
     private static void deleteWorld() throws IOException {
-        World world = Bukkit.getWorld(arenaName);
-        if (world == null) return;
-
-        Bukkit.unloadWorld(world, false);
-        FileUtils.deleteDirectory(world.getWorldFolder());
+        // if (world != null) Bukkit.unloadWorld(world, false);
+        FileUtils.deleteDirectory(new File(Bukkit.getWorldContainer(), arenaName));
     }
 
     public static World createVoidWorld(String worldName) {
-        // 创建世界配置
         WorldCreator creator = new WorldCreator(worldName);
 
-        // 设置世界类型为FLAT（我们会用自定义生成器覆盖）
         creator.environment(World.Environment.NORMAL)
                 .type(WorldType.FLAT)
-                .generateStructures(false) // 禁用结构生成
-                .generator(new VoidChunkGenerator()); // 使用自定义虚空生成器
+                .generateStructures(false)
+                .generator(new TemplateGenerator());
 
         return creator.createWorld();
     }
 
-    // 自定义虚空生成器
-    private static class VoidChunkGenerator extends ChunkGenerator {
+    private static class TemplateGenerator extends ChunkGenerator {
         @Override
-        public ChunkGenerator.ChunkData generateChunkData(World world, Random random, int x, int z, BiomeGrid biome) {
-            return createChunkData(world);
+        public void generateNoise(@NotNull WorldInfo worldInfo, @NotNull Random random,
+                                  int chunkX, int chunkZ, @NotNull ChunkData chunkData) {
+            temps[0].pasteAtChunkData(chunkData);
         }
     }
+
 }
