@@ -1,7 +1,6 @@
 package sudark2.Sudark.arena;
 
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,8 +13,8 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-
-import static sudark2.Sudark.arena.Arena.get;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SaveChunkTemplateCommand implements CommandExecutor {
     @Override
@@ -59,25 +60,67 @@ public class SaveChunkTemplateCommand implements CommandExecutor {
             return true;
         }
 
-        int height = maxY - minY + 1;
-        StringBuilder sb = new StringBuilder("Material[] template = new Material[" + (16 * 16 * height) + "];\n");
-        sb.append("int height = ").append(height).append(";\n");
-        sb.append("int baseY = ").append(minY).append(";\n\n");
+        List<Integer> listX = new ArrayList<>();
+        List<Integer> listY = new ArrayList<>();
+        List<Integer> listZ = new ArrayList<>();
+        List<Material> listBlocks = new ArrayList<>();
+        List<Integer> listType = new ArrayList<>();
 
-        int index = 0;
         for (int y = minY; y <= maxY; y++) {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
-                    Material m = chunk.getBlock(x, y, z).getType();
-                    sb.append("template[").append(index++).append("] = Material.")
-                            .append(m.name()).append(";");
+                    Block block = chunk.getBlock(x, y, z);
+                    if (block.isEmpty()) continue;
+
+                    listX.add(x);
+                    listY.add(y - minY); // 相对高度
+                    listZ.add(z);
+                    listBlocks.add(block.getType());
+
+                    // 使用 BlockPropertyUtil 获取 type
+                    int type = BlockPropertyUtil.getPropertyCode(block);
+                    listType.add(type);
                 }
             }
         }
 
-        Bukkit.getLogger().info("[ChunkTemplate] Y " + minY + " → " + maxY + " (" + height + " layers, " + index + " blocks)");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("ChunkTemplate template = new ChunkTemplate(\n");
+
+        // dx
+        sb.append("    new int[]{");
+        for (int i = 0; i < listX.size(); i++) sb.append(listX.get(i)).append(i == listX.size() - 1 ? "" : ", ");
+        sb.append("},\n");
+
+        // dy
+        sb.append("    new int[]{");
+        for (int i = 0; i < listY.size(); i++) sb.append(listY.get(i)).append(i == listY.size() - 1 ? "" : ", ");
+        sb.append("},\n");
+
+        // dz
+        sb.append("    new int[]{");
+        for (int i = 0; i < listZ.size(); i++) sb.append(listZ.get(i)).append(i == listZ.size() - 1 ? "" : ", ");
+        sb.append("},\n");
+
+        // blocks
+        sb.append("    new Material[]{");
+        for (int i = 0; i < listBlocks.size(); i++)
+            sb.append("Material.").append(listBlocks.get(i).name())
+                    .append(i == listBlocks.size() - 1 ? "" : ", ");
+        sb.append("},\n");
+
+        // type
+        sb.append("    new int[]{");
+        for (int i = 0; i < listType.size(); i++)
+            sb.append(listType.get(i)).append(i == listType.size() - 1 ? "" : ", ");
+        sb.append("}\n");
+
+        sb.append(");");
+
+        Bukkit.getLogger().info("[ChunkTemplate] Y " + minY + " → " + maxY + " (" + listBlocks.size() + " blocks)");
         fileLoad(sb.toString());
-        p.sendMessage("§aTemplate saved! Height=" + height + ", range=" + minY + "~" + maxY);
+        p.sendMessage("§aTemplate saved! Height=" + (maxY - minY + 1) + ", blocks=" + listBlocks.size());
         return true;
     }
 
