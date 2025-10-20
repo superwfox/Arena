@@ -1,27 +1,39 @@
 package sudark2.Sudark.arena;
 
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
+
+import static sudark2.Sudark.arena.Arena.arenaName;
+import static sudark2.Sudark.arena.Arena.world;
 
 public class PortalListener implements Listener {
 
     @EventHandler
-    public void onPortalEnter(EntityPortalEnterEvent event) {
-        Location loc = event.getLocation();
+    public void onPlayerJoin(PlayerPortalEvent event) {
+        Player pl = event.getPlayer();
+        Location loc = pl.getLocation();
         for (int i = -2; i < 2; i++) {
             for (int j = -2; j < 2; j++) {
-                if (loc.getBlock().getRelative(i, -1, j).getType() == Material.GILDED_BLACKSTONE) {
-                    event.setCancelled(true);
-                    Player pl = (Player) event.getEntity();
+                Block block = loc.clone().add(i, -1, j).getBlock();
+                if (block.getType() == Material.GILDED_BLACKSTONE) {
                     inquireTp(pl);
+                    event.setTo(new Location(world, pl.getX() / 12, 8, pl.getZ() / 12));
                     return;
                 }
             }
         }
 
+    }
+
+    @EventHandler
+    public void onEntityChange(EntityTransformEvent event) {
+        if (event.getEntity().getWorld().getName().equals(arenaName)) event.setCancelled(true);
     }
 
 //    @EventHandler
