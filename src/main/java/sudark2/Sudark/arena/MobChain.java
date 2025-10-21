@@ -17,6 +17,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.print.DocFlavor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -25,8 +26,45 @@ import static sudark2.Sudark.arena.Arena.arenaName;
 import static sudark2.Sudark.arena.Arena.get;
 import static sudark2.Sudark.arena.MobContainer.mobs;
 import static sudark2.Sudark.arena.MobContainer.monsters;
+import static sudark2.Sudark.arena.PortalListener.awaitTimeTable;
 
 public class MobChain {
+
+    public static void await(Player pl, int time) {
+        pl.sendMessage("[§e争斗 §f持续下蹲离开此世界]");
+        new BukkitRunnable() {
+            String barName = "§e" + time + "§r§f 次争斗 §e等待中§r§f";
+            BossBar bar = Bukkit.createBossBar(barName, BarColor.WHITE, BarStyle.SOLID, BarFlag.PLAY_BOSS_MUSIC);
+            int wait = 65;
+
+            @Override
+            public void run() {
+                if (wait == -1) {
+                    monitor(pl, time);
+                    cancel();
+                    bar.removeAll();
+                    awaitTimeTable.put(pl, time);
+                    return;
+                }
+                bar.setProgress(wait / 65f);
+
+                if (!pl.isOnline()) {
+                    bar.removeAll();
+                    cancel();
+                    return;
+                }
+
+                if (!pl.isSneaking()) {
+                    pl.teleport(pl.getBedLocation());
+                    bar.removeAll();
+                    cancel();
+                    return;
+                }
+
+                wait--;
+            }
+        }.runTaskLater(get(), 20);
+    }
 
     public static void monitor(Player pl, int time) {
 
@@ -52,11 +90,22 @@ public class MobChain {
                     return;
                 }
 
+                if (stage > 4) {
+                    if (time != awaitTimeTable.get(pl)) {
+                        cancel();
+                        await(pl, time + 1);
+                        bar.removeAll();
+                        PlayerWon(pl, time);
+                    }
+                    return;
+                }
+
                 //AFK
                 if (pl.getPitch() == oldPitch) {
                 } else {
                     oldPitch = pl.getPitch();
                     s++;
+                    if (stage == 4) s += 5;//BOSS只生成两只
                     bar.setProgress(s / 12f);
                 }
 
@@ -68,13 +117,8 @@ public class MobChain {
                     stage++;
                     bar.setTitle("§a§l" + time + "§r§f 次争斗 §l" + stage + 1 + "/5");
                 }
-
-                if (stage > 4) {
-                    cancel();
-                }
             }
         }.runTaskTimerAsynchronously(get(), 0, 100);
-
     }
 
     private static void PlayerWon(Player pl, int time) {

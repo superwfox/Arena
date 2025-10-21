@@ -2,15 +2,22 @@ package sudark2.Sudark.arena;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+
+import java.util.*;
 
 import static sudark2.Sudark.arena.Arena.arenaName;
 import static sudark2.Sudark.arena.Arena.world;
+import static sudark2.Sudark.arena.MobChain.await;
+import static sudark2.Sudark.arena.MobContainer.boss;
 
 public class PortalListener implements Listener {
 
@@ -22,13 +29,37 @@ public class PortalListener implements Listener {
             for (int j = -2; j < 2; j++) {
                 Block block = loc.clone().add(i, -1, j).getBlock();
                 if (block.getType() == Material.GILDED_BLACKSTONE) {
-                    inquireTp(pl);
+                    awaitTimeTable.merge(pl, 0, Integer::sum);
                     event.setTo(new Location(world, pl.getX() / 12, 8, pl.getZ() / 12));
+                    await(pl, 1);
                     return;
                 }
             }
         }
+    }
 
+    static Map<Player, Integer> awaitTimeTable = new HashMap<>();
+
+    @EventHandler
+    public void onEntityDeath(EntityDeathEvent event) {
+        Entity en = event.getEntity();
+        if (!en.getWorld().getName().equals(arenaName)) return;
+
+        Player killer = event.getEntity().getKiller();
+        event.setDroppedExp(killer.getExpToLevel() * awaitTimeTable.get(killer));
+
+        if (Arrays.stream(boss).toList().contains(en.getType())) {
+            awaitTimeTable.merge(killer, 1, Integer::sum);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDead(PlayerDeathEvent event) {
+        Player pl = event.getPlayer();
+        if (pl.getWorld().getName().equals(arenaName)) {
+            event.setDeathMessage(pl.getName() + " 在第 §e" + awaitTimeTable.get(pl) + " §f次争斗中战败而亡");
+            event.setKeepInventory(false);
+        }
     }
 
     @EventHandler

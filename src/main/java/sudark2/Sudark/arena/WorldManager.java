@@ -43,15 +43,15 @@ public class WorldManager {
         @Override
         public void generateNoise(@NotNull WorldInfo worldInfo, @NotNull Random random,
                                   int chunkX, int chunkZ, @NotNull ChunkData chunkData) {
-            temps[biasedRandom()].pasteAtChunkData(chunkData);
+            temps[biasedRandom()].pasteAtChunkData(chunkData,chunkX,chunkZ);
         }
 
         public int biasedRandom() {
             double r = Math.random(); // 0.0 ~ 1.0
-            if (r < 0.35) return 0;   // 0 占 35%
-            if (r < 0.55) return 1;   // 1 占 20%
-            if (r < 0.70) return 2;   // 2 占 15%
-            if (r < 0.80) return 3;   // 3 占 10%
+            if (r < 0.25) return 0;   // 0 占 25%
+            if (r < 0.45) return 1;   // 1 占 20%
+            if (r < 0.60) return 2;   // 2 占 15%
+            if (r < 0.80) return 3;   // 3 占 20%
             if (r < 0.90) return 4;   // 4 占 10%
             return 5;                  // 5 占 10%
         }
