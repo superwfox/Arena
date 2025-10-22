@@ -3,6 +3,7 @@ package sudark2.Sudark.arena;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,11 +12,12 @@ import org.bukkit.event.entity.EntityPortalEnterEvent;
 import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-import static sudark2.Sudark.arena.Arena.arenaName;
-import static sudark2.Sudark.arena.Arena.world;
+import static sudark2.Sudark.arena.Arena.*;
 import static sudark2.Sudark.arena.MobChain.await;
 import static sudark2.Sudark.arena.MobContainer.boss;
 
@@ -46,6 +48,7 @@ public class PortalListener implements Listener {
         if (!en.getWorld().getName().equals(arenaName)) return;
 
         Player killer = event.getEntity().getKiller();
+        if (killer == null) return;
         event.setDroppedExp(killer.getExpToLevel() * awaitTimeTable.get(killer));
 
         if (Arrays.stream(boss).toList().contains(en.getType())) {
@@ -64,8 +67,27 @@ public class PortalListener implements Listener {
 
     @EventHandler
     public void onEntityChange(EntityTransformEvent event) {
-        if (event.getEntity().getWorld().getName().equals(arenaName)) event.setCancelled(true);
+        if (!event.getEntity().getWorld().getName().equals(arenaName)) return;
+
+        // 保存装备
+        if (event.getEntity() instanceof LivingEntity le) {
+            EntityEquipment eq = le.getEquipment();
+            ItemStack[] armor = eq.getArmorContents();
+            ItemStack main = eq.getItemInMainHand();
+            ItemStack off = eq.getItemInOffHand();
+
+            // 取消变形
+            event.setCancelled(true);
+
+            // 恢复装备（防止 Bukkit 清空）
+            Bukkit.getScheduler().runTaskLater(get(), () -> {
+                eq.setArmorContents(armor);
+                eq.setItemInMainHand(main);
+                eq.setItemInOffHand(off);
+            }, 1L);
+        }
     }
+
 
 //    @EventHandler
 //    public void onNewChunkLoad(ChunkLoadEvent event) {
