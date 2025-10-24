@@ -47,7 +47,7 @@ public class MobChain {
                 bar.setProgress(wait / 35f);
                 bar.addPlayer(pl);
 
-                if (!pl.isOnline()) {
+                if (!pl.isOnline() || !pl.getWorld().getName().equals(arenaName)) {
                     bar.removeAll();
                     cancel();
                     return;

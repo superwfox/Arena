@@ -24,6 +24,11 @@ public class PortalListener implements Listener {
     public void onPlayerJoin(PlayerPortalEvent event) {
         Player pl = event.getPlayer();
         Location loc = pl.getLocation();
+        World world = Bukkit.getWorld(arenaName);
+        if (loc.getWorld().equals(world)) {
+            event.setCancelled(true);
+            return;
+        }
         for (int i = -2; i < 2; i++) {
             for (int j = -2; j < 2; j++) {
                 Block block = loc.clone().add(i, -1, j).getBlock();
