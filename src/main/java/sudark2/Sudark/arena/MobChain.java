@@ -145,7 +145,6 @@ public class MobChain {
 
 
     private static void PlayerWon(Player pl, int time) {
-        world.getEntities().forEach(Entity::remove);
         title(pl, "[§e§lWONDERFUL§r§f]", "恭喜你完成了 §b§l" + time + "§r§f 次争斗");
 
         new BukkitRunnable() {
@@ -153,6 +152,9 @@ public class MobChain {
 
             @Override
             public void run() {
+                if (i == 0) world.getEntities().forEach(en -> {
+                    if (en instanceof Mob) en.remove();
+                });
                 i++;
                 if (i == 5) cancel();
                 Firework fw = (Firework) pl.getWorld().spawnEntity(pl.getLocation().add(0, 3, 0), EntityType.FIREWORK_ROCKET);

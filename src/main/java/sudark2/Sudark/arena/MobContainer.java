@@ -21,7 +21,7 @@ public class MobContainer {
     }
 
     static EntityType[] easy = {
-            EntityType.ZOMBIE, EntityType.SKELETON, EntityType.DROWNED
+            EntityType.ZOMBIE, EntityType.SKELETON, EntityType.DROWNED,EntityType.EVOKER
     };
     static EntityType[] normal = {
             EntityType.WITHER_SKELETON, EntityType.WITCH, EntityType.BOGGED, EntityType.SPIDER

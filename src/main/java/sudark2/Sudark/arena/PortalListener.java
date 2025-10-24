@@ -7,10 +7,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityPortalEnterEvent;
-import org.bukkit.event.entity.EntityTransformEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -38,6 +35,13 @@ public class PortalListener implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onEntityPortalEnter(EntityPortalEvent event) {
+        World arena = Bukkit.getWorld(arenaName);
+        if (arena != null && event.getEntity().getWorld().equals(arena))
+            event.setCancelled(true);
     }
 
     static Map<Player, Integer> awaitTimeTable = new HashMap<>();
@@ -112,9 +116,4 @@ public class PortalListener implements Listener {
 //        }, 8L);
 //
 //    }
-
-
-    public void inquireTp(Player pl) {
-        pl.sendMessage("Do you want to teleport to the arena? (y/n)");
-    }
 }
