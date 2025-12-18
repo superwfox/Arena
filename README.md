@@ -1,4 +1,4 @@
-# Arena - Minecraft 竞技场插件
+# Arena - Minecraft 竞技场插件 | [[English Documention]](https://github.com/superwfox/Arena/blob/master/README_EN.md)
 
 基于 Paper 1.21 的 Minecraft 竞技场生存插件，玩家通过传送门进入程序化生成的竞技场世界，挑战逐波增强的怪物。
 
